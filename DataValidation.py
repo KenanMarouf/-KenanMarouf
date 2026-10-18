@@ -51,12 +51,24 @@ def get_db_engine():
     if db_url.startswith("postgresql://"):
       db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
     engine = create_engine(db_url)
-    return engine  # يجب إعادة الـ engine هنا ليخرج من الدالة بنجاح
+    return engine
   except Exception as e:
     st.error(f"خطأ في الاتصال بقاعدة البيانات: {e}")
     return None
+  
 engine = get_db_engine()
+if engine:
+  try:
+    query = "SELECT * FROM central_bank_transactions"
+    df_data = pd.read_sql(query, engine)
 
+    if not df_data.empty:
+      st.subheader("📊 البيانات المخزنة في النظام المركزي")
+      st.dataframe(df_data)
+    else:
+      st.info("قاعدة البيانات فارغة حالياً. قم برفع ملفات كشف الحساب.")
+  except Exception as e:
+    st.error(f"خطأ أثناء قراءة البيانات من الجدول: {e}")
 TAX_OPTIONS = [
     "خاضع للضريبة (15%)",
     "رسوم بنكية خاضعة للضريبة (15%)",
