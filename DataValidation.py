@@ -47,7 +47,11 @@ DATABASE_URL = st.secrets.get(
 @st.cache_resource
 def get_db_engine():
   try:
-    engine = create_engine(DATABASE_URL)
+    # تأكد من إضافة +psycopg2 بعد postgresql لتحديد المكتبة المستخدمة
+    db_url = DATABASE_URL
+    if db_url.startswith("postgresql://"):
+      db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+    engine = create_engine(db_url)
     return engine
   except Exception as e:
     st.error(f"خطأ في الاتصال بقاعدة البيانات: {e}")
